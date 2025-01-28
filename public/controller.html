@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body { 
+            background: #2C4B8A; 
+            color: white;
+            font-family: Arial;
+            padding: 10px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .round-points {
+            background: #1a3366;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .teams {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .team-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 15px;
+            background: #3A66B0;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .team-btn.active {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255,215,0,0.5);
+        }
+
+        .team-score {
+            font-weight: bold;
+            color: #FFD700;
+            margin-left: 10px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            padding: 12px;
+            font-size: 16px;
+            background: #FFD700;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .question {
+            background: #1a3366;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            word-wrap: break-word;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .answer {
+            background: #3A66B0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            touch-action: manipulation;
+            min-height: 60px;
+        }
+
+        .answer:active {
+            transform: scale(0.98);
+        }
+
+        .answer.revealed {
+            background: #1a3366;
+            cursor: default;
+        }
+
+        .points {
+            color: #FFD700;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .control-btn:active, .team-btn:active {
+            transform: scale(0.98);
+        }
+
+        @media (min-width: 768px) {
+            .answers {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+            
+            .team-btn {
+                font-size: 18px;
+                padding: 20px;
+            }
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+		    .wrong-steal {
+        background: #ff4444 !important;
+        color: white !important;
+    }
+
+        .round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;  /* Changed from default to flex-start */
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .round-points {
+            flex-grow: 1;
+            background: #1a3366;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .reset-btn {
+            background: #ff6b6b !important;
+            color: white !important;
+            padding: 6px 20px !important;
+            font-size: 16px !important;
+			font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.2;
+            min-height: 54px;
+            height: auto;  /* Changed from 100% to auto */
+            margin-top: 0;  /* Added to ensure no top margin */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Family Feud Controller</h1>
+        </div>
+
+            <div class="round-header">
+                <div class="round-points">
+                    Round Points: <span id="roundPoints">0</span>
+                </div>
+                <button class="control-btn reset-btn" onclick="resetGame()">Reset<br>Game</button>
+            </div>
+
+        <div class="teams">
+            <button class="team-btn" id="team1Btn" onclick="selectTeam('team1')">
+                <span class="team-name"></span>
+                <span class="team-score">0</span>
+            </button>
+            <button class="team-btn" id="team2Btn" onclick="selectTeam('team2')">
+                <span class="team-name"></span>
+                <span class="team-score">0</span>
+            </button>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="addStrike()">Strike</button>
+            <button class="control-btn" onclick="transferPoints()">Transfer</button>
+            <button class="control-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        <div class="question" id="currentQuestion"></div>
+        <div class="answers" id="answersList"></div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+       const socket = io();
+        let currentTeam = null;
+        let currentMultiplier = 1;
+        let isStealMode = false;
+
+        socket.on('enterStealMode', () => {
+            isStealMode = true;
+        });
+
+        socket.on('gameReset', (state) => {
+            isStealMode = false;
+            updateTeamDisplay(state.teamNames, state.scores);
+            document.getElementById('roundPoints').textContent = '0';
+            document.querySelectorAll('.team-btn').forEach(btn => btn.classList.remove('active'));
+        });
+
+        function addStrike() {
+            if (isStealMode) {
+                socket.emit('strike'); // This will handle wrong steal
+                isStealMode = false;
+            } else {
+                socket.emit('strike');
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Are you sure you want to reset the entire game?')) {
+                socket.emit('resetGame');
+            }
+        }
+
+        socket.on('endStealMode', () => {
+            isStealMode = false;
+        });
+
+        function nextQuestion() {
+            isStealMode = false;
+            socket.emit('nextQuestion');
+        }
+        socket.on('initState', (state) => {
+            updateTeamDisplay(state.teamNames, state.scores);
+            if (state.activeTeam) {
+                selectTeam(state.activeTeam === 'left' ? 'team1' : 'team2');
+            }
+            if (state.currentQuestion) {
+                updateQuestionDisplay(state.currentQuestion, state.revealed);
+            }
+        });
+
+        socket.on('updateController', (data) => {
+            if (data.teamNames) {
+                updateTeamDisplay(data.teamNames, data.scores || {leftScore: 0, rightScore: 0});
+            }
+            if (data.question) {
+                updateQuestionDisplay(data.question, data.revealed);
+            }
+        });
+
+        socket.on('updateScores', (scores) => {
+            document.querySelector('#team1Btn .team-score').textContent = scores.leftScore;
+            document.querySelector('#team2Btn .team-score').textContent = scores.rightScore;
+            document.getElementById('roundPoints').textContent = scores.roundScore;
+        });
+
+        socket.on('updateTeamNames', (names) => {
+            document.querySelector('#team1Btn .team-name').textContent = names.team1;
+            document.querySelector('#team2Btn .team-name').textContent = names.team2;
+        });
+
+        function updateTeamDisplay(names, scores) {
+            document.querySelector('#team1Btn .team-name').textContent = names.team1;
+            document.querySelector('#team2Btn .team-name').textContent = names.team2;
+            document.querySelector('#team1Btn .team-score').textContent = scores.leftScore;
+            document.querySelector('#team2Btn .team-score').textContent = scores.rightScore;
+        }
+
+        function updateQuestionDisplay(question, revealed) {
+            document.getElementById('currentQuestion').textContent = question.text;
+            
+            const answersList = document.getElementById('answersList');
+            answersList.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
+                const div = document.createElement('div');
+                div.className = 'answer';
+                div.dataset.number = index + 1;
+                if (revealed && revealed.includes(index + 1)) {
+                    div.classList.add('revealed');
+                }
+                div.onclick = () => revealAnswer(index + 1, answer.points);
+                div.innerHTML = `
+                    <span>${answer.text}</span>
+                    <span class="points">${answer.points}</span>
+                `;
+                answersList.appendChild(div);
+            });
+        }
+
+        socket.on('setTeam', (team) => {
+            currentTeam = team === 'left' ? 'team1' : 'team2';
+            document.querySelectorAll('.team-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${currentTeam}Btn`).classList.add('active');
+        });
+
+        function selectTeam(team) {
+            if (!isStealMode) {
+                currentTeam = team;
+                document.querySelectorAll('.team-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`${team}Btn`).classList.add('active');
+                socket.emit('setTeam', team === 'team1' ? 'left' : 'right');
+            }
+        }
+
+        function addStrike() {
+            socket.emit('strike');
+        }
+
+        function transferPoints() {
+            if (currentTeam) {
+                socket.emit('transferPoints');
+            }
+        }
+
+        socket.on('updateMultiplier', (multiplier) => {
+            currentMultiplier = multiplier;
+        });
+
+        function revealAnswer(number, points) {
+            socket.emit('revealAnswer', { num: number, points: points });
+            const answer = document.querySelector(`[data-number="${number}"]`);
+            if (answer) {
+                answer.classList.add('revealed');
+            }
+        }
+
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Family Feud</title>
+    <style>
+        @font-face {
+            font-family: 'Digital';
+            src: url('https://fonts.cdnfonts.com/css/led-digital-7') format('woff2');
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #000440 0%, #0066cc 100%);
+            font-family: Arial;
+            color: white;
+        }
+
+        .game-container { 
+            max-width: 100%; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            background: radial-gradient(circle at center, rgba(0,102,204,0.3) 0%, rgba(0,0,0,0.8) 100%);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            width: 300px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+			margin-top: -50px
+        }
+        
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 50px;
+    margin-top: -60px; /* Increased negative margin to move higher */
+    margin-bottom: -80px; /* Increased negative margin to pull scores up more */
+    gap: 100px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-header {
+    background: linear-gradient(145deg, #1a3366, #2C4B8A);
+    padding: 12px 20px; /* Smaller padding */
+    color: #FFD700;
+    font-size: 24px; /* Smaller font */
+    text-transform: uppercase;
+    font-family: 'Digital', Arial;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    border: 3px solid #FFD700;
+    border-radius: 15px;
+    width: 260px; /* Fixed width */
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    z-index: 2; /* Ensure it stays above other elements */
+}
+
+
+.team-header.active {
+    animation: teamPulse 2s infinite;
+    background: linear-gradient(145deg, #234780, #3A66B0);
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+}
+
+@keyframes teamPulse {
+    0% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    50% { box-shadow: 0 0 30px rgba(255,215,0,0.6); }
+    100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+}
+
+.scores {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 20px;
+    gap: 20px;
+    padding-top: 90px; /* Increased padding to prevent overlap with headers */
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.question {
+    margin-top: -20px; /* Added negative margin */
+    margin-bottom: 10px; /* Reduced bottom margin */
+}
+
+.multiplier {
+    margin-top: 0; /* Reduced top margin */
+    margin-bottom: 10px; /* Reduced bottom margin */
+}
+
+.answers-grid {
+    margin-top: 0; /* Reduced top margin */
+    margin-bottom: 10px; /* Reduced bottom margin */
+}
+        .team-score {
+            padding: 15px;
+            border: 5px solid transparent;
+            border-radius: 10px;
+            transition: all 0.3s;
+            background: #000;
+            color: #FFD700;
+            font-size: 36px;
+            font-family: 'Digital', Arial;
+            min-width: 150px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .team-score.active {
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+            50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); }
+            100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        }
+
+        .round-score-top {
+            background: #000;
+            color: #FFD700;
+            font-size: 48px;
+            font-family: 'Digital', Arial;
+            padding: 15px 30px;
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            min-width: 150px;
+            text-align: center;
+            margin: 0 20px;
+            box-shadow: 0 0 25px rgba(255,215,0,0.3);
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            border: 2px solid rgba(255,215,0,0.3);
+        }
+
+        .answer-card {
+            background: linear-gradient(135deg, #2C4B8A 0%, #1a3366 100%);
+            border: 3px solid #FFD700;
+            color: white;
+            font-size: 38px;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+            transform-style: preserve-3d;
+            transition: all 0.6s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+			text-transform: uppercase;
+        }
+
+        .answer-card.revealed {
+            background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+            box-shadow: 0 0 25px rgba(255,215,0,0.3);
+            transform: rotateX(360deg);
+        }
+
+        .question {
+            background: linear-gradient(to right, #2C4B8A, #3A66B0, #2C4B8A);
+            color: white;
+            font-size: 36px;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px auto;
+            text-align: center;
+            max-width: 1200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .multiplier {
+            text-align: center;
+            color: #FFD700;
+            font-size: 32px;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+
+        .strikes {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 48px;
+			margin: 10px 0; /* Reduced margins */
+        }
+
+        .strike {
+            color: #666;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .strike.active {
+            color: #ff0000;
+            text-shadow: 0 0 10px rgba(255,0,0,0.5);
+            animation: strikeAnimation 0.5s ease-in-out;
+        }
+
+        @keyframes strikeAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        #initialSetup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000440 0%, #0066cc 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+
+        #initialSetup input {
+            margin: 10px;
+            padding: 15px;
+            font-size: 20px;
+            width: 400px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #initialSetup button {
+            margin: 20px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        #initialSetup button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: #ffd900;
+        }
+
+        .strike-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .strike-overlay img {
+            max-width: 50%;
+            max-height: 50%;
+            animation: strikeIn 0.5s ease-out;
+        }
+
+        @keyframes strikeIn {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+.multiplier-strikes-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 10px 0;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.multiplier {
+    position: absolute;
+    left: 50px;  /* Adjust this value to move left/right */
+    margin: 0;
+}
+
+.strikes {
+    margin: 0;
+    /* No need for additional positioning since it's centered by the parent container */
+}
+    </style>
+</head>
+<body>
+    <div id="initialSetup">
+        <img src="./images/1.png" alt="Family Feud Logo" style="margin-bottom: 30px; width: 400px; height: auto;">
+        
+        <input type="text" id="leftTeamNameInit" placeholder="Left Team Name">
+        <input type="text" id="rightTeamNameInit" placeholder="Right Team Name">
+        <div style="margin: 20px 0;">
+            <input type="file" id="xmlFile" accept=".xml">
+            <button onclick="loadXMLFile()">Load Questions</button>
+        </div>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="game-container">
+        <img src="./images/2.png" alt="Family Feud Logo" class="logo">
+        
+        <div class="header">
+    <div class="team-header" id="leftTeamHeader">LEFT SIDE FAMILY</div>
+    <div class="team-header" id="rightTeamHeader">RIGHT SIDE FAMILY</div>
+</div>
+
+        <div class="scores">
+            <div class="team-score" id="leftScore">0</div>
+            <div class="round-score-top" id="roundScore">0</div>
+            <div class="team-score" id="rightScore">0</div>
+        </div>
+
+        <div class="question" id="questionText"></div>
+        
+
+        <div class="answers-grid" id="answersGrid"></div>
+<div class="multiplier-strikes-container">
+    <div class="multiplier" id="multiplier">1x</div>
+    <div class="strikes">
+        <div class="strike">X</div>
+        <div class="strike">X</div>
+        <div class="strike">X</div>
+    </div>
+</div>
+
+        <div class="strike-overlay" id="strikeOverlay">
+            <img id="strikeImage" alt="Strike">
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+const gameState = {
+    multiplier: 1,
+    strikes: 0,
+    leftScore: 0,
+    rightScore: 0,
+    roundScore: 0,
+    isLeftTeamActive: false,
+    isRightTeamActive: false,
+    leftTeamName: 'LEFT SIDE FAMILY',
+    rightTeamName: 'RIGHT SIDE FAMILY',
+    isStealMode: false,
+    originalTeam: null
+};
+        const audioFiles = {
+            strike: new Audio('strike.mp3'),
+            reveal: new Audio('reveal.mp3')
+        };
+
+        const socket = io();
+
+        window.onload = function() {
+            Object.values(audioFiles).forEach(audio => {
+                audio.load();
+            });
+            document.addEventListener('keyup', handleKeyPress);
+        };
+
+        function startGame() {
+            if (!questions || questions.length === 0) {
+                alert('Please load questions first!');
+                return;
+            }
+            
+            const leftName = document.getElementById('leftTeamNameInit').value || 'LEFT SIDE FAMILY';
+            const rightName = document.getElementById('rightTeamNameInit').value || 'RIGHT SIDE FAMILY';
+            
+            gameState.leftTeamName = leftName.toUpperCase();
+            gameState.rightTeamName = rightName.toUpperCase();
+            
+            document.getElementById('leftTeamHeader').textContent = gameState.leftTeamName;
+            document.getElementById('rightTeamHeader').textContent = gameState.rightTeamName;
+            
+            socket.emit('teamNamesUpdate', {
+                team1: gameState.leftTeamName,
+                team2: gameState.rightTeamName
+            });
+            
+            document.getElementById('initialSetup').style.display = 'none';
+            updateScores();
+            updateMultiplier();
+            loadCurrentQuestion();
+        }
+
+        function loadXMLFile() {
+            const fileInput = document.getElementById('xmlFile');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+                    const questionNodes = xmlDoc.getElementsByTagName('question');
+                    questions = Array.from(questionNodes).map(q => ({
+                        text: q.getAttribute('text'),
+                        answers: Array.from(q.getElementsByTagName('answer')).map(a => ({
+                            text: a.getAttribute('text'),
+                            points: parseInt(a.getAttribute('points'))
+                        }))
+                    }));
+                    currentQuestionIndex = 0;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function loadCurrentQuestion() {
+            if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+            
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.text;
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+            question.answers.forEach((answer, index) => {
+                const card = document.createElement('div');
+                card.className = 'answer-card';
+                card.dataset.index = index + 1;
+                card.innerHTML = `
+                    <span>${index + 1}</span>
+                    <span class="answer-text" style="display: none">${answer.text}</span>
+                    <span class="answer-points" style="display: none">${answer.points}</span>
+                `;
+                grid.appendChild(card);
+            });
+            updateMultiplier();
+            
+            socket.emit('questionUpdate', {
+                question: question,
+                revealed: []
+            });
+        }
+
+function updateMultiplier() {
+            if (currentQuestionIndex <= 1) {
+                gameState.multiplier = 1;
+                document.getElementById('multiplier').textContent = "1x";
+            } else if (currentQuestionIndex === 2) {
+                gameState.multiplier = 2;
+                document.getElementById('multiplier').textContent = "Double";
+            } else {
+                gameState.multiplier = 3;
+                document.getElementById('multiplier').textContent = "Triple";
+            }
+            socket.emit('updateMultiplier', gameState.multiplier);
+        }
+
+        function showStrikeOverlay(count) {
+            const overlay = document.getElementById('strikeOverlay');
+            const image = document.getElementById('strikeImage');
+            image.src = `images/strike${count}.png`;
+            overlay.style.display = 'flex';
+            playAudio('strike');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 1500);
+        }
+socket.on('wrongStealStrike', () => {
+    showStrikeOverlay(1);  // Always show first strike overlay for wrong steal
+    playAudio('strike');
+});
+        socket.on('revealAnswer', (num) => {
+            revealAnswer(num);
+        });
+
+        socket.on('strike', () => {
+            if (gameState.isStealMode) {
+                showStrikeOverlay(1);
+            } else {
+                addStrike();
+            }
+        });
+
+        socket.on('setTeam', (team) => {
+            setActiveTeam(team);
+        });
+
+        socket.on('nextQuestion', () => {
+            nextQuestion();
+        });
+
+        socket.on('updateScores', (scores) => {
+            gameState.leftScore = scores.leftScore;
+            gameState.rightScore = scores.rightScore;
+            gameState.roundScore = scores.roundScore;
+            updateScores();
+        });
+
+function revealAnswer(num) {
+    const card = document.querySelector(`[data-index="${num}"]`);
+    if (card && !card.classList.contains('revealed')) {
+        card.classList.add('revealed');
+        card.querySelectorAll('span').forEach(span => span.style.display = 'block');
+        const points = parseInt(card.querySelector('.answer-points').textContent);
+        if (!gameState.isStealMode) {
+            gameState.roundScore += points * gameState.multiplier;
+        }
+        socket.emit('revealAnswer', { num: num, points: points * gameState.multiplier });
+        playAudio('reveal');
+        updateScores();
+    }
+}
+
+        function addStrike() {
+            if (gameState.isStealMode) {
+                // For wrong steal, show strike 1 and return to original team
+                showStrikeOverlay(1);
+                const currentTeam = gameState.isLeftTeamActive ? 'left' : 'right';
+                const originalTeam = currentTeam === 'left' ? 'right' : 'left';
+                setActiveTeam(originalTeam);
+                gameState.isStealMode = false;
+            } else if (gameState.strikes < 3) {
+                gameState.strikes++;
+                showStrikeOverlay(gameState.strikes);
+                document.querySelectorAll('.strike')[gameState.strikes - 1].classList.add('active');
+                if (gameState.strikes === 3) {
+                    const currentTeam = gameState.isLeftTeamActive ? 'left' : 'right';
+                    gameState.originalTeam = currentTeam;
+                    const newTeam = currentTeam === 'left' ? 'right' : 'left';
+                    setActiveTeam(newTeam);
+                    gameState.isStealMode = true;
+                }
+            }
+        }
+
+function setActiveTeam(team) {
+    const leftScore = document.getElementById('leftScore');
+    const rightScore = document.getElementById('rightScore');
+    const leftHeader = document.getElementById('leftTeamHeader');
+    const rightHeader = document.getElementById('rightTeamHeader');
+    
+    if (team === 'left') {
+        gameState.isLeftTeamActive = true;
+        gameState.isRightTeamActive = false;
+        leftScore.classList.add('active');
+        rightScore.classList.remove('active');
+        leftHeader.classList.add('active');
+        rightHeader.classList.remove('active');
+    } else {
+        gameState.isLeftTeamActive = false;
+        gameState.isRightTeamActive = true;
+        leftScore.classList.remove('active');
+        rightScore.classList.add('active');
+        leftHeader.classList.remove('active');
+        rightHeader.classList.add('active');
+    }
+}
+
+        function transferPoints() {
+            if (gameState.isLeftTeamActive) {
+                gameState.leftScore += gameState.roundScore;
+            } else if (gameState.isRightTeamActive) {
+                gameState.rightScore += gameState.roundScore;
+            }
+            gameState.roundScore = 0;
+            updateScores();
+        }
+        socket.on('endStealMode', () => {
+            gameState.isStealMode = false;
+        });
+        function nextQuestion() {
+            if (questions.length === 0) return;
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                // Show game completion message
+                const gameEndMessage = document.createElement('div');
+                gameEndMessage.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #3A66B0;
+                    color: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    font-size: 24px;
+                    text-align: center;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                    z-index: 1000;
+                `;
+                gameEndMessage.innerHTML = `
+                    <h2 style="margin-top: 0;">Game Complete!</h2>
+                    <p>All questions have been answered.</p>
+                    <p>Final Scores:</p>
+                    <p>${gameState.leftTeamName}: ${gameState.leftScore}</p>
+                    <p>${gameState.rightTeamName}: ${gameState.rightScore}</p>
+                    <button onclick="this.parentElement.remove()" style="
+                        background: #FFD700;
+                        color: black;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 10px;
+                    ">Close</button>
+                `;
+                document.body.appendChild(gameEndMessage);
+                
+                // Clear the current question display
+                document.getElementById('questionText').textContent = '';
+                document.getElementById('answersGrid').innerHTML = '';
+                return;
+            }
+            
+            gameState.strikes = 0;
+            gameState.roundScore = 0;
+            gameState.isStealMode = false;
+            gameState.originalTeam = null;
+            document.querySelectorAll('.strike').forEach(strike => strike.classList.remove('active'));
+            loadCurrentQuestion();
+            updateScores();
+        }
+
+        function handleKeyPress(e) {
+            if (questions.length === 0) return;
+            const key = e.key.toLowerCase();
+            if (!isNaN(key) && key !== ' ') {
+                revealAnswer(parseInt(key));
+            } else if (key === 'x') {
+                addStrike();
+            } else if (e.key === 'ArrowLeft' && !gameState.isStealMode) {
+                setActiveTeam('left');
+                socket.emit('setTeam', 'left');
+            } else if (e.key === 'ArrowRight' && !gameState.isStealMode) {
+                setActiveTeam('right');
+                socket.emit('setTeam', 'right');
+            } else if (e.key === ' ') {
+                transferPoints();
+            }
+        }
+
+        function playAudio(type) {
+            if (audioFiles[type]) {
+                audioFiles[type].currentTime = 0;
+                audioFiles[type].play().catch(error => {
+                    console.log(`Error playing ${type}:`, error);
+                });
+            }
+        }
+
+        function updateScores() {
+            document.getElementById('leftScore').textContent = gameState.leftScore;
+            document.getElementById('rightScore').textContent = gameState.rightScore;
+            document.getElementById('roundScore').textContent = gameState.roundScore;
+            
+            socket.emit('scoreUpdate', {
+                leftScore: gameState.leftScore,
+                rightScore: gameState.rightScore,
+                roundScore: gameState.roundScore
+            });
+        }
+		// Add these new socket listeners
+        socket.on('enterStealMode', () => {
+            gameState.isStealMode = true;
+        });
+// Add this new socket listener with the existing ones
+        socket.on('refreshPage', () => {
+            // Small delay to ensure all game reset operations are complete
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        });
+		
+socket.on('gameReset', (state) => {
+    gameState.multiplier = state.multiplier;
+    gameState.strikes = state.strikes;
+    gameState.leftScore = state.scores.leftScore;
+    gameState.rightScore = state.scores.rightScore;
+    gameState.roundScore = state.scores.roundScore;
+    gameState.isStealMode = false;
+    gameState.originalTeam = null;
+    
+    document.querySelectorAll('.strike').forEach(strike => strike.classList.remove('active'));
+    document.querySelectorAll('.answer-card').forEach(card => {
+        card.classList.remove('revealed');
+        card.querySelectorAll('span').forEach(span => {
+            if (!span.classList.contains('answer-number')) {
+                span.style.display = 'none';
+            }
+        });
+    });
+    
+    updateScores();
+    loadCurrentQuestion();
+});
+    </script>
+</body>
+</html>
